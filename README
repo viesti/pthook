@@ -1,2 +1,6 @@
 post-receive hook for notifying Pivotal Tracker about commits. Works
 with gitolite. Messages with [#story-id] will show in story activity.
+
+The script is a Python translation of ruby code from
+http://pastebin.com/TQAfypWr. Thought that I'd learn more when having
+to write things out by myself :)
