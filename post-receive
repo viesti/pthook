@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+import sys
+import os
+from subprocess import check_output, CalledProcessError
+from lxml import etree
+from lxml.builder import E
+from urllib2 import Request, urlopen, URLError, HTTPError
+
+def get_config(key):
+    try:
+        return check_output(["git", "config", key]).strip()
+    except CalledProcessError, e:
+        return None
+
+ZERO = "0" * 40
+
+token = get_config("pivotal-tracker.token")
+if not token:
+    sys.exit(0)
+gitweb = get_config("pivotal-tracker.gitweb")
+
+for line in sys.stdin:
+    old, new, ref = line.strip().split(" ")
+
+    # skip deletions
+    if new == ZERO:
+        continue
+
+    # new branches have ZERO as old revision
+    rev_range = new if old == ZERO else "%s..%s" % (old, new)
+
+    commits = check_output(["git",
+                            "rev-list",
+                            "--pretty=%h%n%an%n%s%n%b%n",
+                            rev_range]).strip().split("\n\n\n")
+
+    for commit in commits:
+        parts = commit.split("\n")
+        full_sha1 = parts[0].split(" ")[1] # commit hash
+        sha1 = parts[1]                    # abbreviated sha1
+        author = parts[2]                  # author name
+        message = parts[3]                 # commit message subject and body, newline-separated
+
+        if gitweb:
+            url = "%s/?p=%s;h=%s" % (gitweb, os.environ["GL_REPO"], full_sha1)
+            message = "%s\n%s" % (message, url)
+
+        xml = (E.source_commit(
+                E.commit_id(sha1),
+                E.author(author),
+                E.message(message)))
+
+        req = Request(url="http://www.pivotaltracker.com/services/v3/source_commits",
+                      data=etree.tostring(xml, pretty_print=True),
+                      headers={'Content-Type': 'application/xml',
+                               'X-TrackerToken': token})
+        try:
+            urlopen(req)
+        except IOError, e:
+            print "Could not notify Pivotal Tracker", e
