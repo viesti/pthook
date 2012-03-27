@@ -27,8 +27,10 @@ for line in sys.stdin:
     if new == ZERO:
         continue
 
+    rev_range = "%s..%s" % (old, new)
     # new branches have ZERO as old revision
-    rev_range = new if old == ZERO else "%s..%s" % (old, new)
+    if old == ZERO:
+        rev_range = new
 
     commits = run(["git",
                    "rev-list",
