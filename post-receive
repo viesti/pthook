@@ -2,16 +2,16 @@
 
 import sys
 import os
-from subprocess import check_output, CalledProcessError
+from subprocess import Popen, PIPE
 from lxml import etree
 from lxml.builder import E
 from urllib2 import Request, urlopen, URLError, HTTPError
 
+def run(args):
+    return Popen(args, stdout=PIPE).communicate()[0]
+
 def get_config(key):
-    try:
-        return check_output(["git", "config", key]).strip()
-    except CalledProcessError, e:
-        return None
+    return run(["git", "config", key])
 
 ZERO = "0" * 40
 
@@ -30,10 +30,10 @@ for line in sys.stdin:
     # new branches have ZERO as old revision
     rev_range = new if old == ZERO else "%s..%s" % (old, new)
 
-    commits = check_output(["git",
-                            "rev-list",
-                            "--pretty=%h%n%an%n%s%n%b%n",
-                            rev_range]).strip().split("\n\n\n")
+    commits = run(["git",
+                   "rev-list",
+                   "--pretty=%h%n%an%n%s%n%b%n",
+                   rev_range]).strip().split("\n\n\n")
 
     for commit in commits:
         parts = commit.split("\n")
