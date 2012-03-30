@@ -43,7 +43,7 @@ for line in sys.stdin:
         message = parts[3]                 # commit message subject and body, newline-separated
 
         if gitweb:
-            url = "%s/?p=%s;h=%s" % (gitweb, os.environ["GL_REPO"], full_sha1)
+            url = "%s/?p=%s;h=%s" % (gitweb, os.environ["GL_REPO"], sha1)
             message = "%s\n%s" % (message, url)
 
         xml = (E.source_commit(
