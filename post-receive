@@ -58,6 +58,6 @@ for line in sys.stdin:
                       headers={'Content-Type': 'application/xml',
                                'X-TrackerToken': token})
         try:
-            urlopen(req, timeout=5)
+            urlopen(req)
         except IOError, e:
             print "Could not notify Pivotal Tracker", e
