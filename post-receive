@@ -20,6 +20,19 @@ if not token:
     sys.exit(0)
 gitweb = get_config("pivotal-tracker.gitweb")
 
+def rev_list_args(old, new):
+    if old == ZERO:
+        return ["git",
+                "rev-list",
+                "--max-count",
+                "1"
+                "--pretty=%h%n%an%n%s%n%b%n",
+                new]
+    return ["git",
+            "rev-list",
+            "--pretty=%h%n%an%n%s%n%b%n",
+            "%s..%s" % (old, new)]
+
 for line in sys.stdin:
     old, new, ref = line.strip().split(" ")
 
@@ -30,10 +43,7 @@ for line in sys.stdin:
     # new branches have ZERO as old revision
     rev_range = new if old == ZERO else "%s..%s" % (old, new)
 
-    commits = run(["git",
-                   "rev-list",
-                   "--pretty=%h%n%an%n%s%n%b%n",
-                   rev_range]).strip().split("\n\n\n")
+    commits = run(rev_list_args(old, new)).strip().split("\n\n\n")
 
     for commit in commits:
         parts = commit.split("\n")
