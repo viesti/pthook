@@ -64,7 +64,7 @@ for line in sys.stdin:
         xml = (E.source_commit(
                 E.commit_id(sha1),
                 E.author(author),
-                E.message(message)))
+                E.message(unicode(message, "UTF-8"))))
 
         req = Request(url="http://www.pivotaltracker.com/services/v3/source_commits",
                       data=etree.tostring(xml, pretty_print=True),
