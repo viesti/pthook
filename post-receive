@@ -43,11 +43,6 @@ for line in sys.stdin:
     if new == ZERO:
         continue
 
-    rev_range = "%s..%s" % (old, new)
-    # new branches have ZERO as old revision
-    if old == ZERO:
-        rev_range = new
-
     commits = run(rev_list_args(old, new)).strip().split("\n\n\n")
 
     for commit in commits:
