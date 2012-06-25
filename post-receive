@@ -23,18 +23,15 @@ if not token:
     sys.exit(0)
 gitweb = get_config("pivotal-tracker.gitweb")
 
-def rev_list_args(old, new):
+def list_commits(old, new):
     if old == ZERO:
-        return ["git",
+        return run(["%s/hooks/show_new_revisions.sh" % os.path.abspath(os.curdir),
+                    ref,
+                    new]).strip().split("\n\n\n")
+    return run(["git",
                 "rev-list",
-                "--max-count",
-                "1",
                 "--pretty=%h%n%an%n%s%n%b%n",
-                new]
-    return ["git",
-            "rev-list",
-            "--pretty=%h%n%an%n%s%n%b%n",
-            "%s..%s" % (old, new)]
+                "%s..%s" % (old, new)]).strip().split("\n\n\n")
 
 for line in sys.stdin:
     old, new, ref = line.strip().split(" ")
@@ -43,7 +40,7 @@ for line in sys.stdin:
     if new == ZERO:
         continue
 
-    commits = run(rev_list_args(old, new)).strip().split("\n\n\n")
+    commits = list_commits(old, new)
 
     for commit in commits:
         parts = commit.split("\n")
