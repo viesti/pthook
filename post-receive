@@ -28,7 +28,7 @@ def rev_list_args(old, new):
         return ["git",
                 "rev-list",
                 "--max-count",
-                "1"
+                "1",
                 "--pretty=%h%n%an%n%s%n%b%n",
                 new]
     return ["git",
