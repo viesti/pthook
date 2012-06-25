@@ -36,6 +36,10 @@ def list_commits(old, new):
 for line in sys.stdin:
     old, new, ref = line.strip().split(" ")
 
+    # skip tags
+    if ref.startswith("refs/tags"):
+        continue
+
     # skip deletions
     if new == ZERO:
         continue
